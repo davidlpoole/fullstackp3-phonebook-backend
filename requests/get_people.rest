@@ -2,4 +2,4 @@
 GET http://localhost:3001/api/people
 
 ### Get ID
-GET http://localhost:3001/api/people/1
+GET http://localhost:3001/api/people/61430133314f972bea09f836
