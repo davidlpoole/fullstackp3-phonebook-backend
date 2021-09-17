@@ -21,7 +21,11 @@ const unknownEndpoint = (request, response) => {
 
 const errorHandler = (error, request, response, next) => {
     if (error.name === 'CastError') {
+        console.log(error.message)
         return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        console.log(error.message)
+        return response.status(400).json({ error: error.message })
     }
     console.error(error.message)
     next(error)
@@ -70,7 +74,7 @@ app.get('/api/people/:id', (request, response, next) => {
 
 
 // ADD A NEW PERSON
-app.post('/api/people', (request, response) => {
+app.post('/api/people', (request, response, next) => {
     const body = request.body
 
     if (body.name === undefined) {
@@ -89,6 +93,7 @@ app.post('/api/people', (request, response) => {
     person.save().then(savedPerson => {
         response.json(savedPerson)
     })
+        .catch(error => next(error))
 })
 
 // DELETE A PERSON
@@ -109,8 +114,11 @@ app.put('/api/people/:id', (request, response, next) => {
         number: body.number,
         dtupdated: new Date()
     }
-
-    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    const opts = {
+        runValidators: true,
+        new: true
+    };
+    Person.findByIdAndUpdate(request.params.id, person, opts)
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
